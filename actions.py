@@ -1,5 +1,7 @@
 import datetime
 from typing import NamedTuple, Optional
+import database
+from sqlalchemy.orm import Session
 
 
 class ActionCreate(NamedTuple):
@@ -22,6 +24,35 @@ class ActionCreate(NamedTuple):
 
 class Action(ActionCreate):
     id: int
+
+
+    def str(self):
+        return f"{self.id=}{self.name=}{self.create_date=}{self.create_datetime=}{self.create_time=}"
+
+
+def add_action(message: str) -> ActionCreate:
+    name = message
+    create_datetime = datetime.datetime.now()
+    create_date = create_datetime.date()
+    create_time = create_datetime.time()
+    action = ActionCreate(name, create_date, create_datetime, create_time)
+    return action
+
+
+def get_all_actions(db: Session):
+    actions_from_db: list[database.ActionsDB] = database.get_all_actions(db)
+    ans = []
+    for action_from_db in actions_from_db:
+        ans.append(Action(id=action_from_db.id,
+                          name=action_from_db.name,
+                          create_date=action_from_db.create_date,
+                          create_datetime=action_from_db.create_datetime,
+                          create_time=action_from_db.create_time))
+    return ans
+
+def get_last_action():
+    pass
+
 
 
 if __name__ == "__main__":
