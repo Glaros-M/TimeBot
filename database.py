@@ -2,8 +2,8 @@ import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, Date, DateTime, Time
 from db import Base, SessionLocal
-from actions import ActionCreate, Action
-
+#from actions import ActionCreate, Action
+# CRUD выносят в отдельный файл для избежания циклического импорта
 
 
 class ActionsDB(Base):
@@ -35,7 +35,7 @@ def get_all_actions_by_day(date: datetime.date) -> list[ActionsDB]:
 
 
 
-def create_action(action: ActionCreate) -> ActionsDB:
+def create_action(action) -> ActionsDB:
     db: Session = SessionLocal()
     db_action = ActionsDB(**action.__dict__)
     db.add(db_action)
@@ -55,6 +55,12 @@ def delete_action(id: int) -> None:
         db.close()
         raise Exception(f"Action {id=} not found!")
     db.close()
+
+
+def get_last_action() -> ActionsDB:
+    db: Session = SessionLocal()
+    action = db.query(ActionsDB).order_by(ActionsDB.create_datetime.desc()).first()
+    return action
 
 
 if __name__ == "__main__":
