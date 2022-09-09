@@ -40,6 +40,8 @@ def convert_action_list_to_str(actions: list[Action]) -> str:
     str = ""
     for act in actions:
         str += act.str() + "\n"
+    if str == "":
+        str = "Действия отсутствуют"
     return str
 
 

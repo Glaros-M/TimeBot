@@ -1,11 +1,16 @@
+#! venv/bin/python3.10
 import datetime
+import os
+
 #from aiogram.types import BotCommand
 from aiogram import types
 from db import engine, SessionLocal
+
 from sqlalchemy.orm import Session
 import database
 import actions
 from middlewares import AccessMiddleware
+import statistic
 
 
 import aiohttp
@@ -30,7 +35,8 @@ async def set_commands(bot: Bot):
     commands = [
         types.BotCommand(command="/start", description="Начало"),
         types.BotCommand(command="/categories", description="Базовые категории"),
-        #BotCommand(command="/cancel", description="Отменить текущее действие")
+        types.BotCommand(command="/day_statistic", description="Получить статистику по сегодня"),
+        types.BotCommand(command="/actions", description="Сегодняшние действия")
     ]
     await bot.set_my_commands(commands)
 
@@ -41,14 +47,14 @@ async def send_welcome(message: types.Message):
     await message.answer(
         "Сегодняшние действия: /actions"
         )
-    print(f"{message.from_user.id=}, {message.from_user.username=}, {message.from_user.last_name=}, {message.from_user.first_name=}")
+    #print(f"{message.from_user.id=}, {message.from_user.username=}, {message.from_user.last_name=}, {message.from_user.first_name=}")
     await set_commands(bot)
 
 
 @dp.message_handler(commands=['categories'])
 async def get_base_categories(message: types.Message):
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
-    buttons = ["test"]
+    buttons = ["Работаю", "Программирую", "Отдых"]
     keyboard.add(*buttons)
     await message.answer("Выберите категорию из представленных или напечатайте свою: ", reply_markup=keyboard)
 
@@ -69,15 +75,23 @@ async def del_expense(message: types.Message):
 @dp.message_handler(commands=['actions'])
 async def get_day_actions(message: types.Message):
     """"""
-    getted_actions = actions.get_all_actions()
+    getted_actions = actions.get_actions_by_date(datetime.date.today())
     str = actions.convert_action_list_to_str(getted_actions)
 
     await message.answer(str, parse_mode="markdown")
 
 
+@dp.message_handler(commands=['day_statistic'])
+async def get_day_statistic(message: types.Message):
+    # TODO: Добавить фильтрацию по пользователю при запросе данных
+    # TODO: Добавить обработку отсутствия значений (при построении графика появляется ошибка ZeroDivisionError
+    photo_name = statistic.get_today_statistic(message.from_user.id)
+    photo = open(photo_name, 'rb')
+    await bot.send_photo(message.chat.id, photo, caption=f"Статистика за {datetime.date.today()}:")
+    os.remove(photo_name)
 
 
-@dp.message_handler()
+@dp.message_handler(lambda message: not message.text.startswith('/'))
 async def add_expense(message: types.Message):
     """Добавление нового действия"""
     action = actions.add_action(message)
