@@ -85,8 +85,8 @@ def get_all_actions():
     return ans
 
 
-def get_actions_by_date(date: datetime.date):
-    actionsDB = database.get_all_actions_by_day(date)
+def get_actions_by_date(date: datetime.date, user_id: int):
+    actionsDB = database.get_all_actions_by_day(date, user_id)
     actions: list[Action] = []
     for actiondb in actionsDB:
         actions.append(Action(**_get_clear_dict(actiondb)))

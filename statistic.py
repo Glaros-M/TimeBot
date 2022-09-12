@@ -34,12 +34,9 @@ class TimeDeltaPerDay(NamedTuple):
         self.percents.append(value.percent)
 
 
-
-
-
-def get_times_delta_for_date(date: datetime.date = datetime.date(2022, 8, 31)) -> TimeDeltaPerDay | None:
+def get_times_delta_for_date(user_id: int, date: datetime.date = datetime.date(2022, 8, 31)) -> TimeDeltaPerDay | None:
     time_delta_per_day = TimeDeltaPerDay([], [])
-    t1 = actions.get_actions_by_date(date)
+    t1 = actions.get_actions_by_date(date, user_id)
     if len(t1) > 1:
         deltas = []
         all_delta = datetime.timedelta(0)
@@ -91,11 +88,10 @@ def draw_plot(time_delta_per_day: TimeDeltaPerDay, filename: str):
 
 
 def get_today_statistic(user_id: int):
-    times_delta = get_times_delta_for_date(datetime.date.today())
+    times_delta = get_times_delta_for_date(user_id, datetime.date.today())
     if times_delta:
         times_delta = accumulate_same_actions(times_delta)
         times_delta = apply_filters(times_delta)
-        print(times_delta)
         filename = f"images/{datetime.date.today()}-{user_id}.png"
         draw_plot(times_delta, filename)
         return filename

@@ -75,7 +75,7 @@ async def del_expense(message: types.Message):
 @dp.message_handler(commands=['actions'])
 async def get_day_actions(message: types.Message):
     """"""
-    getted_actions = actions.get_actions_by_date(datetime.date.today())
+    getted_actions = actions.get_actions_by_date(datetime.date.today(), message.from_user.id)
     str = actions.convert_action_list_to_str(getted_actions)
 
     await message.answer(str, parse_mode="markdown")
@@ -88,7 +88,7 @@ async def get_day_statistic(message: types.Message):
     if photo_name:
         photo = open(photo_name, 'rb')
         await bot.send_photo(message.chat.id, photo, caption=f"Статистика за {datetime.date.today()}:")
-        # os.remove(photo_name) # Удаляем фото после использования.
+        #os.remove(photo_name) # Удаляем фото после использования. Нужно ли хранить старые графики?
     else:
         await message.answer("Пока что недостаточно действий для составления статистики")
 
@@ -96,7 +96,7 @@ async def get_day_statistic(message: types.Message):
 async def add_expense(message: types.Message):
     """Добавление нового действия"""
     action = actions.add_action(message)
-    last_actions = actions.get_actions_by_date(datetime.date.today())
+    last_actions = actions.get_actions_by_date(datetime.date.today(), message.from_user.id)
     str = actions.convert_action_list_to_str(last_actions)
     answer_message = (
         f"Начато действие {action.name} в {action.create_datetime}.\n\n"

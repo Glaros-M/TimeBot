@@ -26,13 +26,11 @@ def get_all_actions() -> list[ActionsDB]:
     return a
 
 
-def get_all_actions_by_day(date: datetime.date) -> list[ActionsDB]:
+def get_all_actions_by_day(date: datetime.date, user_id: int) -> list[ActionsDB]:
     db: Session = SessionLocal()
-    ans = db.query(ActionsDB).filter_by(create_date=date).order_by("create_datetime").all()
+    ans = db.query(ActionsDB).filter_by(create_date=date, user_telegram_id=user_id).order_by("create_datetime").all()
     db.close()
     return ans
-
-
 
 
 def create_action(action) -> ActionsDB:
