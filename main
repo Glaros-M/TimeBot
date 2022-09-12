@@ -21,6 +21,7 @@ database.Base.metadata.create_all(bind=engine)
 
 
 API_TOKEN = "1171530088:AAEY9EXzFxBXZm4_Bymzm18hYpm8KZjnpx8"     # os.getenv("TELEGRAM_API_TOKEN")
+# TODO: Сделать файлы настройки окружения и вынести секретную информацию в окружение
 ACCESS_LIST = [
     1115933014,
     1179070234
@@ -53,6 +54,7 @@ async def send_welcome(message: types.Message):
 
 @dp.message_handler(commands=['categories'])
 async def get_base_categories(message: types.Message):
+    # TODO: Добавить больше вариантов. Продумать динамическое управление.
     keyboard = types.ReplyKeyboardMarkup(resize_keyboard=True)
     buttons = ["Работаю", "Программирую", "Отдых"]
     keyboard.add(*buttons)
@@ -83,7 +85,6 @@ async def get_day_actions(message: types.Message):
 
 @dp.message_handler(commands=['day_statistic'])
 async def get_day_statistic(message: types.Message):
-    # TODO: Добавить фильтрацию по пользователю при запросе данных
     photo_name = statistic.get_today_statistic(message.from_user.id)
     if photo_name:
         photo = open(photo_name, 'rb')
