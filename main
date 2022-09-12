@@ -84,12 +84,13 @@ async def get_day_actions(message: types.Message):
 @dp.message_handler(commands=['day_statistic'])
 async def get_day_statistic(message: types.Message):
     # TODO: Добавить фильтрацию по пользователю при запросе данных
-    # TODO: Добавить обработку отсутствия значений (при построении графика появляется ошибка ZeroDivisionError
     photo_name = statistic.get_today_statistic(message.from_user.id)
-    photo = open(photo_name, 'rb')
-    await bot.send_photo(message.chat.id, photo, caption=f"Статистика за {datetime.date.today()}:")
-    os.remove(photo_name)
-
+    if photo_name:
+        photo = open(photo_name, 'rb')
+        await bot.send_photo(message.chat.id, photo, caption=f"Статистика за {datetime.date.today()}:")
+        # os.remove(photo_name) # Удаляем фото после использования.
+    else:
+        await message.answer("Пока что недостаточно действий для составления статистики")
 
 @dp.message_handler(lambda message: not message.text.startswith('/'))
 async def add_expense(message: types.Message):

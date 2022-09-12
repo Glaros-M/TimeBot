@@ -37,21 +37,22 @@ class TimeDeltaPerDay(NamedTuple):
 
 
 
-def get_times_delta_for_date(date: datetime.date = datetime.date(2022, 8, 31)) -> TimeDeltaPerDay:
+def get_times_delta_for_date(date: datetime.date = datetime.date(2022, 8, 31)) -> TimeDeltaPerDay | None:
     time_delta_per_day = TimeDeltaPerDay([], [])
     t1 = actions.get_actions_by_date(date)
-    deltas = []
-    all_delta = datetime.timedelta(0)
-    for i in range(1, len(t1)):
-        deltas.append(t1[i].create_datetime - t1[i - 1].create_datetime)
-        all_delta += t1[i].create_datetime - t1[i - 1].create_datetime
-    deltas.append(datetime.timedelta(0))
+    if len(t1) > 1:
+        deltas = []
+        all_delta = datetime.timedelta(0)
+        for i in range(1, len(t1)):
+            deltas.append(t1[i].create_datetime - t1[i - 1].create_datetime)
+            all_delta += t1[i].create_datetime - t1[i - 1].create_datetime
+        deltas.append(datetime.timedelta(0))
 
-    for i in range(len(t1)):
-        time_delta_per_day.actions_names.append(t1[i].name)
-        time_delta_per_day.percents.append(deltas[i]/all_delta*100)
-    return time_delta_per_day
-
+        for i in range(len(t1)):
+            time_delta_per_day.actions_names.append(t1[i].name)
+            time_delta_per_day.percents.append(deltas[i]/all_delta*100)
+        return time_delta_per_day
+    return None
 
 def accumulate_same_actions(time_delta_per_day: TimeDeltaPerDay) -> TimeDeltaPerDay:
     a = list(set(time_delta_per_day.actions_names))
@@ -91,11 +92,14 @@ def draw_plot(time_delta_per_day: TimeDeltaPerDay, filename: str):
 
 def get_today_statistic(user_id: int):
     times_delta = get_times_delta_for_date(datetime.date.today())
-    times_delta = accumulate_same_actions(times_delta)
-    times_delta = apply_filters(times_delta)
-    filename = f"{datetime.date.today()}-{user_id}.png"
-    draw_plot(times_delta, filename)
-    return filename
+    if times_delta:
+        times_delta = accumulate_same_actions(times_delta)
+        times_delta = apply_filters(times_delta)
+        print(times_delta)
+        filename = f"images/{datetime.date.today()}-{user_id}.png"
+        draw_plot(times_delta, filename)
+        return filename
+    return None
 
 if __name__ == "__main__":
     pass
