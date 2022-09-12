@@ -20,6 +20,7 @@ class ActionCreate():
 
 
 class Action(ActionCreate):
+    """ Возможно воспользоваться тут конструктором из обьекта ActionDB??? """
 
     def __init__(self,
                  id: int,
@@ -39,6 +40,8 @@ def convert_action_list_to_str(actions: list[Action]) -> str:
     str = ""
     for act in actions:
         str += act.str() + "\n"
+    if str == "":
+        str = "Действия отсутствуют"
     return str
 
 
@@ -90,12 +93,13 @@ def get_actions_by_date(date: datetime.date):
     return actions
 
 
-def get_last_action():
-    pass
-
+def get_last_action() -> Action:
+    action_db = database.get_last_action()
+    action = Action(**_get_clear_dict(action_db))
+    return action
 
 if __name__ == "__main__":
-    b = ActionCreate(name="123", create_date=datetime.date.today(), create_datetime=datetime.datetime.now(),
-               create_time=datetime.datetime.now().time(), user_telegram_id="1")
-
-    print(b.__dict__)
+    for action in get_all_actions():
+        print(action.str())
+    print("*"*10, "-"*5, "*"*10)
+    print(get_last_action().str())
