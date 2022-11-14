@@ -2,7 +2,7 @@
 import datetime
 import os
 
-#from aiogram.types import BotCommand
+# from aiogram.types import BotCommand
 from aiogram import types
 from db import engine, SessionLocal
 
@@ -12,25 +12,22 @@ import actions
 from middlewares import AccessMiddleware
 import statistic
 
-
 import aiohttp
 from aiogram import Bot, Dispatcher, executor, types
 
 database.Base.metadata.create_all(bind=engine)
 
-
-
-API_TOKEN = "1171530088:AAEY9EXzFxBXZm4_Bymzm18hYpm8KZjnpx8"     # os.getenv("TELEGRAM_API_TOKEN")
+API_TOKEN = "1171530088:AAEY9EXzFxBXZm4_Bymzm18hYpm8KZjnpx8"  # os.getenv("TELEGRAM_API_TOKEN")
 # TODO: Сделать файлы настройки окружения и вынести секретную информацию в окружение
 ACCESS_LIST = [
     1115933014,
     1179070234
 ]
 
-
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
 dp.middleware.setup(AccessMiddleware(ACCESS_LIST))
+
 
 async def set_commands(bot: Bot):
     commands = [
@@ -47,8 +44,8 @@ async def send_welcome(message: types.Message):
     """Отправляет приветственное сообщение и помощь по боту"""
     await message.answer(
         "Сегодняшние действия: /actions"
-        )
-    #print(f"{message.from_user.id=}, {message.from_user.username=}, {message.from_user.last_name=}, {message.from_user.first_name=}")
+    )
+    # print(f"{message.from_user.id=}, {message.from_user.username=}, {message.from_user.last_name=}, {message.from_user.first_name=}")
     await set_commands(bot)
 
 
@@ -60,6 +57,20 @@ async def get_base_categories(message: types.Message):
     keyboard.add(*buttons)
     await message.answer("Выберите категорию из представленных или напечатайте свою: ", reply_markup=keyboard)
 
+
+@dp.message_handler(commands=['dump_text'])
+async def dump_db(message: types.Message):
+    await message.answer(database.dump_db())
+
+
+@dp.message_handler(commands=['dump_file'])
+async def dump_db(message: types.Message):
+    #TODO: Необходимо протестировать эту функцию. Не уверен что она работает корректно.
+    filename = f"db_dump_{datetime.datetime}.txt"
+    database.dump_db_to_file(filename)
+    f = open(filename, "rb")
+    await bot.send_document(message.chat.id, (filename, f))
+    f.close()
 
 
 @dp.message_handler(lambda message: message.text.startswith('/del'))
@@ -73,6 +84,7 @@ async def del_expense(message: types.Message):
         answer_message = e
 
     await message.answer(answer_message)
+
 
 @dp.message_handler(commands=['actions'])
 async def get_day_actions(message: types.Message):
@@ -89,9 +101,10 @@ async def get_day_statistic(message: types.Message):
     if photo_name:
         photo = open(photo_name, 'rb')
         await bot.send_photo(message.chat.id, photo, caption=f"Статистика за {datetime.date.today()}:")
-        #os.remove(photo_name) # Удаляем фото после использования. Нужно ли хранить старые графики?
+        # os.remove(photo_name) # Удаляем фото после использования. Нужно ли хранить старые графики?
     else:
         await message.answer("Пока что недостаточно действий для составления статистики")
+
 
 @dp.message_handler(lambda message: not message.text.startswith('/'))
 async def add_expense(message: types.Message):
@@ -104,6 +117,8 @@ async def add_expense(message: types.Message):
         f"Предыдущие сегодня:\n "
         f"{str}")
     await message.answer(answer_message, parse_mode="markdown")
+
+
 
 
 if __name__ == '__main__':

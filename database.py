@@ -16,7 +16,26 @@ class ActionsDB(Base):
     create_datetime = Column(DateTime, index=True)
     create_time = Column(Time, index=True)
 
+    def __repr__(self):
+        return f"{self.id}, {self.user_telegram_id}, {self.name}, {self.create_date}, {self.create_datetime}, {self.create_time}"
 
+    def __str__(self):
+        return self.__repr__()
+
+
+def dump_db() -> str:
+    data = get_all_actions()
+    out = ""
+    for line in data:
+        out+= str(line) + "\n"
+    return out
+
+
+def dump_db_to_file(path: str) -> None:
+    data = dump_db()
+    f = open(path, "w", encoding="utf8")
+    f.write(data)
+    f.close()
 
 
 def get_all_actions() -> list[ActionsDB]:
@@ -62,4 +81,4 @@ def get_last_action() -> ActionsDB:
 
 
 if __name__ == "__main__":
-    pass
+    print(dump_db())
