@@ -10,6 +10,9 @@ Color = str
 
 class ColorSchema(NamedTuple):
     colors: list[Color]
+    comment: str
+
+    # text_color: Color = "black"
 
     @property
     def schema_size(self):
@@ -19,21 +22,32 @@ class ColorSchema(NamedTuple):
 class WedgesProperties(NamedTuple):
     lw: int | None = None  # Ширина линий
     ls: str | None = None  # Стиль линий
-    edgecolor: Color | None = None  # Цвет линий
+    edgecolor: Color | None = "black"  # Цвет линий
     capstyle: str | None = None  # Внешний вид линий butt - квадрат, round округлый
-    fill: bool | None = None  # Заливать?
+    fill: bool | None = True  # Заливать?
     hatch: str | None = None  # Штриховка Как применить ее для отдельного сектора?
     label: str | None = None  # Будет выводиться в легенде. Где она?
     sketch_params: int | None = None  # Параметр "кривости" рисунка
 
+    def dict(self):
+        return self._asdict()
+
+    def __repr__(self):
+        return str(self.dict())
+
 
 class TextProperties(NamedTuple):
     color: Color | None = None
-    backgroundcolor: Color | None = None
-    font: str | None = None
+    backgroundcolor: Color | None = "0001"
     fontfamily: str | None = None
     fontproperties: fm.FontProperties | None = None
     fontsize: str | float | None = None
+
+    def dict(self):
+        return self._asdict()
+
+    def __repr__(self):
+        return str(self.dict())
 
 
 class PieProperties(NamedTuple):
@@ -50,54 +64,55 @@ class PieProperties(NamedTuple):
     wedgeprops: WedgesProperties | None = None  # Внешний вид секторов
     textprops: TextProperties | None = None  # Внешний вид текста
 
+    def dict(self):
+        d = {**self._asdict()}
+        d.update({'wedgeprops': self.wedgeprops.dict()})
+        d.update({'textprops': self.textprops.dict()})
+        return d
 
-class PiePropertiesSimple:
-    def __init__(self,
-                 colors: list[Color] | None = None,
-                 labeldistance: float | None = None,  # Расстояние от центра окружности до подписи. В радиусах
-                 autopct: str | None = None,  # Формат подписи размера доли
-                 pctdistance: float | None = None,
-                 # Расстояние от центра окружности до подписи размера доли. В радиусах
-                 shadow: bool | None = None,  # Тень от фигуры
-                 startangle: int | None = None,  # Угол поворота
-                 radius: float | None = None,
-                 center: tuple[int, int] | None = None,
-                 # Координаты центра диаграммы, относительно фрейма (координатной сетки)
-                 frame: bool | None = None,  # Отображение рамки с координатами
-                 rotatelabels: bool | None = None,  # Поворот подписей
-                 wedgeprops: WedgesProperties | None = None,  # Внешний вид секторов
-                 textprops: TextProperties | None = None  # Внешний вид текста
-                 ):
-        self.colors = colors
-        self.labeldistance = labeldistance
-        self.autopct = autopct
-        self.pctdistance = pctdistance
-        self.shadow = shadow
-        self.startangle = startangle
-        self.radius = radius
-        self.center = center
-        self.frame = frame
-        self.rotatelabels = rotatelabels
-        self.wedgeprops = wedgeprops
-        self.textprops = textprops
+    def __repr__(self):
+        return str(self.dict())
 
 
-colors1 = ["#fbef86",
-           "#fde96d",
-           "#f8d162",
-           "#f2ba55",
-           "#eea14d",
-           "#e88c3f",
-           "#e77235",
-           "#c64e29",
-           "#9d452a",
-           "#753d2b"
-           ]
+yellow_orange_crayola = ColorSchema(colors=["#fbef86",
+                                            "#fde96d",
+                                            "#f8d162",
+                                            "#f2ba55",
+                                            "#eea14d",
+                                            "#e88c3f",
+                                            "#e77235",
+                                            "#c64e29",
+                                            "#9d452a",
+                                            "#753d2b"
+                                            ],
+                                    comment="""color gradient from 
+                                            https://medium.com/%D1%86%D0%B2%D0%B5%D1%82/%D0%BF%D0%BE%D0%B4%D0%B1%D0%
+                                            BE%D1%80-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D1%8C%D0%BD%D1%8B%D1%85-%D1%
+                                            86%D0%B2%D0%B5%D1%82%D0%BE%D0%B2%D1%8B%D1%85-%D0%BF%D0%B0%D0%BB%D0%B8%D1%
+                                            82%D1%80-%D0%B4%D0%BB%D1%8F-%D0%B2%D0%B8%D0%B7%D1%83%D0%B0%D0%BB%D0%B8%D0%
+                                            B7%D0%B0%D1%86%D0%B8%D0%B8-%D0%B4%D0%B0%D0%BD%D0%BD%D1%8B%D1%85
+                                            -323735a4ceb2"""
+                                    )
 
-yellow_orange_crayola = ColorSchema(colors=colors1)
+wedgeprops1 = WedgesProperties(
+    lw=1,
+    ls='-',
+    edgecolor="#402e2b",
+    capstyle="round",
+    fill=True,
+    hatch="",
+    label="123",
+    sketch_params=0
+)
 
-pie_property1 = PieProperties(
-    colors=yellow_orange_crayola.colors,
+textprops1 = TextProperties(
+    color="black",
+    fontproperties=FONT_FURORE,
+    fontsize="large",
+    backgroundcolor="0001"
+)
+
+yellow_orange_crayola_pie = PieProperties(
     labeldistance=1.1,
     pctdistance=0.8,
     shadow=False,
@@ -106,85 +121,29 @@ pie_property1 = PieProperties(
     center=(0, 0),
     frame=False,
     rotatelabels=False,
-    wedgeprops=WedgesProperties(
-        lw=1,
-        ls='--',
-        edgecolor='k',
-        capstyle='round'
-    ),
-    textprops=TextProperties(
-        color="blask",
-        fontproperties=FONT_FURORE,
-        fontsize="large"
-    )
-)
-
-pie_property2 = PiePropertiesSimple(
+    wedgeprops=wedgeprops1,
+    textprops=textprops1,
     colors=yellow_orange_crayola.colors,
-    labeldistance=1.1,
-    pctdistance=0.8,
-    shadow=False,
-    startangle=90,
-    radius=1.1,
-    center=(0, 0),
-    frame=False,
-    rotatelabels=False,
-    wedgeprops=WedgesProperties(
-        lw=1,
-        ls='--',
-        edgecolor='k',
-        capstyle='round'
-    ),
-    textprops=TextProperties(
-        color="blask",
-        fontproperties=FONT_FURORE,
-        fontsize="large"
-    )
 )
-
-
-def draw_plot(data, labels, filename: str):
-    fig = plt.figure(figsize=(10, 9))
-    ax1 = plt.pie(data,
-                  labels=labels,
-                  labeldistance=1.1,  # Расстояние от центра окружности до подписи. В радиусах
-                  # autopct='%1.1f%%',  # Формат подписи размера доли
-                  pctdistance=0.8,  # Расстояние от центра окружности до подписи размера доли. В радиусах
-                  shadow=False,
-                  startangle=90,
-                  colors=colors1,
-                  radius=1.1,
-
-                  wedgeprops={'lw': 1,  # Ширина линий
-                              'ls': '-',  # Стиль линий
-                              'edgecolor': "#402e2b",  # Цвет линий
-                              "capstyle": "round",  # Внешний вид линий butt - квадрат, round округлый
-                              'fill': True,  # Заливать?
-                              'hatch': "",  # Штриховка Как применить ее для отдельного сектора?
-                              'label': "123",  # Будет выводиться в легенде. Где она?
-                              'sketch_params': 0  # Параметр "кривости" рисунка
-                              },  # Внешний вид секторов
-                  textprops={'color': "black",
-                             # 'backgroundcolor': "white",
-                             # 'font': "Gora Free",
-                             # 'fontfamily': 'Gora Free',
-                             'fontproperties': FONT_FURORE,
-                             'fontsize': 'large'  # Или размер float
-                             },  # Внешний вид текста
-                  center=(0, 0),  # Координаты центра диаграммы, относительно фрейма (координатной сетки)
-                  frame=False,  # Отображение рамки с координатами
-                  rotatelabels=False  # Поворот подписей
-                  )  # line 240
-    plt.savefig(filename)
-    fig.clear()
-    plt.close(fig)
 
 
 if __name__ == "__main__":
-    #print(pie_property2.__dict__)
 
+    def draw_plot2(data, labels, filename: str):
+        fig = plt.figure(figsize=(10, 9))
+        ax1 = plt.pie(data,
+                      labels=labels,
+                      **yellow_orange_crayola_pie.dict(),
+                      )  # line 240
+        plt.savefig(filename)
+        fig.clear()
+        plt.close(fig)
+
+
+    print(yellow_orange_crayola_pie.dict())
     filename = f"testplot1.png"
     test_data = [1, 20, 3, 40, 5, 6, 7, 8, 9, 10][::-1]
-    test_labels = ["Короче текст 1 но чуть по длиннее ", "Короче текст 2\n но с переносом строки", 3, 4, 5, 6, "Короче текст 7 \nочень сука длинный\n фыждвлаофолыиазшгйукилуфокипм", 8, 9, 10][::-1]
-    draw_plot(test_data, test_labels, filename)
+    test_labels = ["Короче текст 1 но чуть по длиннее ", "Короче текст 2\n но с переносом строки", 3, 4, 5, 6,
+                   "Короче текст 7 \nочень сука длинный\n фыждвлаофолыиазшгйукилуфокипм", 8, 9, 10][::-1]
+    draw_plot2(test_data, test_labels, filename)
     os.system(f"xdg-open {filename}")
